@@ -2,6 +2,7 @@ package org.mengyun.tcctransaction.api;
 
 /**
  * Created by changmingxie on 10/28/15.
+ * 事务状态枚举类
  */
 public enum TransactionStatus {
 

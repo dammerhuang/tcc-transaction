@@ -7,6 +7,7 @@
 
        <mvc:annotation-driven/>
        <context:component-scan base-package="org.mengyun.tcctransaction.sample.dubbo"/>
+       <!-- 使用CGLIB创建代理 -->
        <aop:aspectj-autoproxy proxy-target-class="true"/>
 
 

@@ -21,10 +21,19 @@ import java.util.List;
  */
 public class JdbcTransactionRepository extends CachableTransactionRepository {
 
+    /**
+     * 域
+     */
     private String domain;
 
+    /**
+     * 事务日志表后缀
+     */
     private String tbSuffix;
 
+    /**
+     * 数据源
+     */
     private DataSource dataSource;
 
     private ObjectSerializer serializer = new KryoPoolSerializer();
@@ -57,6 +66,11 @@ public class JdbcTransactionRepository extends CachableTransactionRepository {
         return dataSource;
     }
 
+    /**
+     * 用jdbc创建事务日志
+     * @param transaction
+     * @return
+     */
     protected int doCreate(Transaction transaction) {
 
         Connection connection = null;
@@ -123,6 +137,7 @@ public class JdbcTransactionRepository extends CachableTransactionRepository {
 
             stmt = connection.prepareStatement(builder.toString());
 
+            // 添加Participant的时候，其实就是存在CONTENT里面
             stmt.setBytes(1, serializer.serialize(transaction));
             stmt.setInt(2, transaction.getStatus().getId());
             stmt.setTimestamp(3, new Timestamp(transaction.getLastUpdateTime().getTime()));

@@ -41,11 +41,12 @@ public class CapitalTradeOrderServiceImpl implements CapitalTradeOrderService {
 
         System.out.println("capital try record called. time seq:" + DateFormatUtils.format(Calendar.getInstance(), "yyyy-MM-dd HH:mm:ss"));
 
-
+        // tradeOrder => 交易订单
         TradeOrder foundTradeOrder = tradeOrderRepository.findByMerchantOrderNo(tradeOrderDto.getMerchantOrderNo());
 
 
         //check if trade order has been recorded, if yes, return success directly.
+        // 这一步也是属于幂等性判断
         if (foundTradeOrder == null) {
 
             TradeOrder tradeOrder = new TradeOrder(
@@ -56,10 +57,12 @@ public class CapitalTradeOrderServiceImpl implements CapitalTradeOrderService {
             );
 
             try {
+                // 插入一条交易订单
                 tradeOrderRepository.insert(tradeOrder);
 
                 CapitalAccount transferFromAccount = capitalAccountRepository.findByUserId(tradeOrderDto.getSelfUserId());
 
+                // 更新资金账户的金额
                 transferFromAccount.transferFrom(tradeOrderDto.getAmount());
 
                 capitalAccountRepository.save(transferFromAccount);

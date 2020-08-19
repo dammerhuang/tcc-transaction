@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by changming.xie on 2/23/17.
+ * 工厂Builder
  */
 public final class FactoryBuilder {
 
@@ -14,10 +15,19 @@ public final class FactoryBuilder {
 
     }
 
+    /**
+     * bean工厂集合
+     */
     private static List<BeanFactory> beanFactories = new ArrayList<BeanFactory>();
 
     private static ConcurrentHashMap<Class, SingeltonFactory> classFactoryMap = new ConcurrentHashMap<Class, SingeltonFactory>();
 
+    /**
+     * 获取单例工厂，如果获取不到则先创建
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public static <T> SingeltonFactory<T> factoryOf(Class<T> clazz) {
 
         if (!classFactoryMap.containsKey(clazz)) {

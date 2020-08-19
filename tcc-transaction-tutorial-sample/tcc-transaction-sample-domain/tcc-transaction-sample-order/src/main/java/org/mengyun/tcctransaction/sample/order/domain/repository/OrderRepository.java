@@ -29,6 +29,10 @@ public class OrderRepository {
         }
     }
 
+    /**
+     * 更新订单，用到了乐观锁
+     * @param order 订单
+     */
     public void updateOrder(Order order) {
         order.updateVersion();
         int effectCount = orderDao.update(order);

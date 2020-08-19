@@ -44,6 +44,13 @@ public class ReflectionUtils {
         return oldValue;
     }
 
+    /**
+     * 获取声明这个方法的接口的Class
+     * @param aClass
+     * @param methodName
+     * @param parameterTypes
+     * @return
+     */
     public static Class getDeclaringType(Class aClass, String methodName, Class<?>[] parameterTypes) {
 
         Method method = null;

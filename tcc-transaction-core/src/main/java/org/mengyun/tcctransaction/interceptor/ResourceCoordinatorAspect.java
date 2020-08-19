@@ -7,10 +7,14 @@ import org.aspectj.lang.annotation.Pointcut;
 
 /**
  * Created by changmingxie on 11/8/15.
+ * 资源协调者切面
  */
 @Aspect
 public abstract class ResourceCoordinatorAspect {
 
+    /**
+     * 资源协调拦截器
+     */
     private ResourceCoordinatorInterceptor resourceCoordinatorInterceptor;
 
     @Pointcut("@annotation(org.mengyun.tcctransaction.api.Compensable)")

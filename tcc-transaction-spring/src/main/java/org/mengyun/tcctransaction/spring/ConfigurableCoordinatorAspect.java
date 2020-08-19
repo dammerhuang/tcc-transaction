@@ -12,6 +12,9 @@ import org.springframework.core.Ordered;
 @Aspect
 public class ConfigurableCoordinatorAspect extends ResourceCoordinatorAspect implements Ordered {
 
+    /**
+     * 事务管理配置器
+     */
     private TransactionConfigurator transactionConfigurator;
 
     public void init() {
@@ -23,6 +26,7 @@ public class ConfigurableCoordinatorAspect extends ResourceCoordinatorAspect imp
 
     @Override
     public int getOrder() {
+        // 第二优先级
         return Ordered.HIGHEST_PRECEDENCE + 1;
     }
 

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 /**
  * Created by changmingxie on 10/26/15.
+ * 全局事务ID
  */
 public class TransactionXid implements Xid, Serializable {
 
@@ -16,14 +17,25 @@ public class TransactionXid implements Xid, Serializable {
 
     private int formatId = 1;
 
+    /**
+     * 全局事务ID
+     */
     private byte[] globalTransactionId;
 
+    /**
+     * 分支事务标识
+     */
     private byte[] branchQualifier;
 
+    /**
+     * 自定义的事务ID
+     */
     private static byte[] CUSTOMIZED_TRANSACTION_ID = "UniqueIdentity".getBytes();
 
     public TransactionXid() {
+        // 使用UUID作为全局事务的ID
         globalTransactionId = uuidToByteArray(UUID.randomUUID());
+        // 使用UUID作为分支事务的标识
         branchQualifier = uuidToByteArray(UUID.randomUUID());
     }
 
@@ -82,12 +94,14 @@ public class TransactionXid implements Xid, Serializable {
         if (Arrays.equals(CUSTOMIZED_TRANSACTION_ID, globalTransactionId)) {
 
             stringBuilder.append(new String(globalTransactionId));
-            stringBuilder.append(":").append(new String(branchQualifier));
+            stringBuilder.append(":");
+            stringBuilder.append(new String(branchQualifier));
 
         } else {
 
             stringBuilder.append(UUID.nameUUIDFromBytes(globalTransactionId).toString());
-            stringBuilder.append(":").append(UUID.nameUUIDFromBytes(branchQualifier).toString());
+            stringBuilder.append(":");
+            stringBuilder.append(UUID.nameUUIDFromBytes(branchQualifier).toString());
         }
 
         return stringBuilder.toString();

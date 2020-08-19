@@ -19,6 +19,9 @@ public class TransactionManager {
 
     private TransactionRepository transactionRepository;
 
+    /**
+     * CURRENT存着整个分布式事务的所有事务日志对象
+     */
     private static final ThreadLocal<Deque<Transaction>> CURRENT = new ThreadLocal<Deque<Transaction>>();
 
     private ExecutorService executorService;
@@ -73,14 +76,19 @@ public class TransactionManager {
 
     public void commit(boolean asyncCommit) {
 
+        // 获取当前事务对象
         final Transaction transaction = getCurrentTransaction();
 
+        // 将事务对象的状态设置为正在确认
         transaction.changeStatus(TransactionStatus.CONFIRMING);
 
+        // 更新之
         transactionRepository.update(transaction);
 
+        // 异步确认
         if (asyncCommit) {
             try {
+                // commit开始时间
                 Long statTime = System.currentTimeMillis();
 
                 executorService.submit(new Runnable() {
@@ -95,6 +103,7 @@ public class TransactionManager {
                 throw new ConfirmingException(commitException);
             }
         } else {
+            // 同步commit
             commitTransaction(transaction);
         }
     }
@@ -103,10 +112,12 @@ public class TransactionManager {
     public void rollback(boolean asyncRollback) {
 
         final Transaction transaction = getCurrentTransaction();
+        // 取出需要Cancel的事务对象，将其状态设置问CANCELLING
         transaction.changeStatus(TransactionStatus.CANCELLING);
 
         transactionRepository.update(transaction);
 
+        // 异步回滚
         if (asyncRollback) {
 
             try {
@@ -121,7 +132,7 @@ public class TransactionManager {
                 throw new CancellingException(rollbackException);
             }
         } else {
-
+            // 同步回滚
             rollbackTransaction(transaction);
         }
     }
@@ -129,9 +140,12 @@ public class TransactionManager {
 
     private void commitTransaction(Transaction transaction) {
         try {
+            // 整个事务commit，其实就是调用所有参与者的commit方法
             transaction.commit();
+            // 删除数据库对应事务记录和缓存里对应的事务对象
             transactionRepository.delete(transaction);
         } catch (Throwable commitException) {
+            // 如果commit过程报错则抛出Confirm异常
             logger.warn("compensable transaction confirm failed, recovery job will try to confirm later.", commitException);
             throw new ConfirmingException(commitException);
         }
@@ -139,21 +153,33 @@ public class TransactionManager {
 
     private void rollbackTransaction(Transaction transaction) {
         try {
+            // 这个rollback其实就是将所有参与者都执行rollback
             transaction.rollback();
+            // 删掉对应数据库的事务记录和缓存里面的事务对象
             transactionRepository.delete(transaction);
         } catch (Throwable rollbackException) {
+            // 如果回滚报错则对外抛出Cancel异常
             logger.warn("compensable transaction rollback failed, recovery job will try to rollback later.", rollbackException);
             throw new CancellingException(rollbackException);
         }
     }
 
+    /**
+     * 获取当前事务
+     * @return 事务对象
+     */
     public Transaction getCurrentTransaction() {
         if (isTransactionActive()) {
+            // 最顶部的出栈
             return CURRENT.get().peek();
         }
         return null;
     }
 
+    /**
+     * 事务是否激活的判断依据是当前线程本地对象是否有事务日志集合
+     * @return 线程是否激活
+     */
     public boolean isTransactionActive() {
         Deque<Transaction> transactions = CURRENT.get();
         return transactions != null && !transactions.isEmpty();
@@ -170,6 +196,7 @@ public class TransactionManager {
     }
 
     public void cleanAfterCompletion(Transaction transaction) {
+        // 如果当前事务处于激活状态 && 事务对象不为空
         if (isTransactionActive() && transaction != null) {
             Transaction currentTransaction = getCurrentTransaction();
             if (currentTransaction == transaction) {

@@ -10,14 +10,21 @@ import java.util.Map;
 
 /**
  * Created by changmingxie on 11/22/15.
+ * 用于Spring的BeanFactory
  */
 public class SpringBeanFactory implements BeanFactory, ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
+    /**
+     * 注入应用上下文
+     * @param applicationContext 应用上下文
+     * @throws BeansException BeansException
+     */
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+        // 注册bean工厂
         FactoryBuilder.registerBeanFactory(this);
     }
 

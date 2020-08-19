@@ -9,15 +9,25 @@ import java.util.Set;
 
 /**
  * Created by changming.xie on 6/1/16.
+ * 默认的恢复策略配置
  */
 public class DefaultRecoverConfig implements RecoverConfig {
 
     public static final RecoverConfig INSTANCE = new DefaultRecoverConfig();
 
+    /**
+     * 最大重试次数
+     */
     private int maxRetryCount = 30;
 
+    /**
+     * 恢复周期
+     */
     private int recoverDuration = 120; //120 seconds
 
+    /**
+     * 定时表达式
+     */
     private String cronExpression = "0 */1 * * * ?";
 
     private int asyncTerminateThreadCorePoolSize = 512;
@@ -29,6 +39,7 @@ public class DefaultRecoverConfig implements RecoverConfig {
     private Set<Class<? extends Exception>> delayCancelExceptions = new HashSet<Class<? extends Exception>>();
 
     public DefaultRecoverConfig() {
+        // 默认的延迟取消异常：OptimisticLockException & SocketTimeoutException
         delayCancelExceptions.add(OptimisticLockException.class);
         delayCancelExceptions.add(SocketTimeoutException.class);
     }

@@ -9,6 +9,7 @@ import org.springframework.core.Ordered;
 
 /**
  * Created by changmingxie on 10/30/15.
+ * 可配置事务切面
  */
 @Aspect
 public class ConfigurableTransactionAspect extends CompensableTransactionAspect implements Ordered {
@@ -28,6 +29,7 @@ public class ConfigurableTransactionAspect extends CompensableTransactionAspect 
 
     @Override
     public int getOrder() {
+        // 最高优先级别
         return Ordered.HIGHEST_PRECEDENCE;
     }
 

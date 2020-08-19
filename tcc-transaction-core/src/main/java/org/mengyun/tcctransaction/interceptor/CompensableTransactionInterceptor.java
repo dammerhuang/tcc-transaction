@@ -36,22 +36,35 @@ public class CompensableTransactionInterceptor {
         this.delayCancelExceptions.addAll(delayCancelExceptions);
     }
 
+    /**
+     * 拦截可补偿的方法
+     * @param pjp
+     * @return
+     * @throws Throwable
+     */
     public Object interceptCompensableMethod(ProceedingJoinPoint pjp) throws Throwable {
 
+        // 可补偿方法上下文
         CompensableMethodContext compensableMethodContext = new CompensableMethodContext(pjp);
 
+        // 判断当前TCC事务是否激活状态
         boolean isTransactionActive = transactionManager.isTransactionActive();
 
+        // 校验是否合法的事务上下文
         if (!TransactionUtils.isLegalTransactionContext(isTransactionActive, compensableMethodContext)) {
             throw new SystemException("no active compensable transaction while propagation is mandatory for method " + compensableMethodContext.getMethod().getName());
         }
 
+        // 获取并根据方法角色处理执行该方法
         switch (compensableMethodContext.getMethodRole(isTransactionActive)) {
             case ROOT:
+                // 执行根方法
                 return rootMethodProceed(compensableMethodContext);
             case PROVIDER:
+                // 执行提供者方法
                 return providerMethodProceed(compensableMethodContext);
             default:
+                // 默认直接执行
                 return pjp.proceed();
         }
     }
@@ -63,8 +76,10 @@ public class CompensableTransactionInterceptor {
 
         Transaction transaction = null;
 
+        // 是否异步确认
         boolean asyncConfirm = compensableMethodContext.getAnnotation().asyncConfirm();
 
+        // 是否异步取消
         boolean asyncCancel = compensableMethodContext.getAnnotation().asyncCancel();
 
         Set<Class<? extends Exception>> allDelayCancelExceptions = new HashSet<Class<? extends Exception>>();
@@ -72,26 +87,28 @@ public class CompensableTransactionInterceptor {
         allDelayCancelExceptions.addAll(Arrays.asList(compensableMethodContext.getAnnotation().delayCancelExceptions()));
 
         try {
-
+            // 这里就是整个事务的开始！！！
             transaction = transactionManager.begin(compensableMethodContext.getUniqueIdentity());
 
             try {
+                // 执行可补偿方法
                 returnValue = compensableMethodContext.proceed();
             } catch (Throwable tryingException) {
-
+                // 报错则判断所报异常是否是DelayCancelException异常的一种
                 if (!isDelayCancelException(tryingException, allDelayCancelExceptions)) {
 
                     logger.warn(String.format("compensable transaction trying failed. transaction content:%s", JSON.toJSONString(transaction)), tryingException);
 
                     transactionManager.rollback(asyncCancel);
                 }
-
+                // 抛出Try异常
                 throw tryingException;
             }
 
             transactionManager.commit(asyncConfirm);
 
         } finally {
+            // 整个方法执行后的清理工作
             transactionManager.cleanAfterCompletion(transaction);
         }
 
@@ -102,9 +119,10 @@ public class CompensableTransactionInterceptor {
 
         Transaction transaction = null;
 
-
+        // 异步确认
         boolean asyncConfirm = compensableMethodContext.getAnnotation().asyncConfirm();
 
+        // 异步取消
         boolean asyncCancel = compensableMethodContext.getAnnotation().asyncCancel();
 
         try {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 /**
  * Created by changmingxie on 11/9/15.
+ * Confirm/Cancel方法调用上下文
  */
 public class InvocationContext implements Serializable {
 

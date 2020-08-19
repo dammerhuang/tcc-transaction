@@ -11,6 +11,9 @@ import org.aspectj.lang.annotation.Pointcut;
 @Aspect
 public abstract class CompensableTransactionAspect {
 
+    /**
+     * 可补偿事务拦截器
+     */
     private CompensableTransactionInterceptor compensableTransactionInterceptor;
 
     public void setCompensableTransactionInterceptor(CompensableTransactionInterceptor compensableTransactionInterceptor) {

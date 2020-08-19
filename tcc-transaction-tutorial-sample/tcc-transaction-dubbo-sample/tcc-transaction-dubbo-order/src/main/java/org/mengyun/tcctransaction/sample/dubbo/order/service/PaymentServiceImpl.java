@@ -32,13 +32,22 @@ public class PaymentServiceImpl {
     @Autowired
     OrderRepository orderRepository;
 
+    /**
+     * 主业务服务
+     * @param orderNo
+     * @param redPacketPayAmount
+     * @param capitalPayAmount
+     */
     @Compensable(confirmMethod = "confirmMakePayment", cancelMethod = "cancelMakePayment", asyncConfirm = false, delayCancelExceptions = {SocketTimeoutException.class, org.apache.dubbo.remoting.TimeoutException.class})
     public void makePayment(@UniqueIdentity String orderNo, BigDecimal redPacketPayAmount, BigDecimal capitalPayAmount) {
+        // 这里还是用log打印吧......
         System.out.println("order try make payment called.time seq:" + DateFormatUtils.format(Calendar.getInstance(), "yyyy-MM-dd HH:mm:ss"));
 
         Order order = orderRepository.findByMerchantOrderNo(orderNo);
         //check if the order status is DRAFT, if no, means that another call makePayment for the same order happened, ignore this call makePayment.
+        // 实现幂等
         if (order.getStatus().equals("DRAFT")) {
+            // 将order状态改为PAYING：支付中
             order.pay(redPacketPayAmount, capitalPayAmount);
             try {
                 orderRepository.updateOrder(order);
@@ -47,7 +56,9 @@ public class PaymentServiceImpl {
             }
         }
 
+        // 资金账户操作
         String result = capitalTradeOrderService.record(buildCapitalTradeOrderDto(order));
+        // 红包账户操作
         String result2 = redPacketTradeOrderService.record(buildRedPacketTradeOrderDto(order));
     }
 

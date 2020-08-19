@@ -58,6 +58,7 @@ public class Transaction implements Serializable {
     public Transaction(Object uniqueIdentity,TransactionType transactionType) {
 
         this.xid = new TransactionXid(uniqueIdentity);
+        // 初始事务状态为TRYING
         this.status = TransactionStatus.TRYING;
         this.transactionType = transactionType;
     }

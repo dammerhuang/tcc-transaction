@@ -34,6 +34,7 @@ public class PlaceOrderServiceImpl {
     public String placeOrder(long payerUserId, long shopId, List<Pair<Long, Integer>> productQuantities, final BigDecimal redPacketPayAmount) {
         Shop shop = shopRepository.findById(shopId);
 
+        // 创建订单并保存
         final Order order = orderService.createOrder(payerUserId, shop.getOwnerUserId(), productQuantities);
 
         Boolean result = false;
@@ -45,6 +46,7 @@ public class PlaceOrderServiceImpl {
 //            Future future1 = executorService.submit(new Runnable() {
 //                @Override
 //                public void run() {
+                    // 使用到TCC的方法，付款
                     paymentService.makePayment(order.getMerchantOrderNo(), redPacketPayAmount, order.getTotalAmount().subtract(redPacketPayAmount));
 //                }
 //            });

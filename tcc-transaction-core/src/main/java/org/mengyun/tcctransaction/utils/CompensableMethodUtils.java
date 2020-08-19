@@ -14,6 +14,12 @@ import java.lang.reflect.Method;
  */
 public class CompensableMethodUtils {
 
+    /**
+     * 这个其实是如果接口对应的方法没有标注@Compensable的话，就去找子类也就是pjp.getTarget()获取到的那个对象对应的那个method
+     * 感想：这种写法之前看大佬代码有用到，没想到在这里也看到了，看来是一个很通用的处理方式了
+     * @param pjp
+     * @return
+     */
     public static Method getCompensableMethod(ProceedingJoinPoint pjp) {
         Method method = ((MethodSignature) (pjp.getSignature())).getMethod();
 

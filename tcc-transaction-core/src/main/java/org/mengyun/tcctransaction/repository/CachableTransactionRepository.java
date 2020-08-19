@@ -35,6 +35,11 @@ public abstract class CachableTransactionRepository implements TransactionReposi
         return result;
     }
 
+    /**
+     * 更新事务对象之后再更新缓存中的事务对象
+     * @param transaction 事务对象
+     * @return 返回影响行数
+     */
     @Override
     public int update(Transaction transaction) {
         int result = 0;

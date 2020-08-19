@@ -23,6 +23,7 @@ public class Order implements Serializable {
 
     private BigDecimal capitalPayAmount;
 
+    // draft ==> 草案、草稿
     private String status = "DRAFT";
 
     private String merchantOrderNo;
@@ -38,6 +39,7 @@ public class Order implements Serializable {
     public Order(long payerUserId, long payeeUserId) {
         this.payerUserId = payerUserId;
         this.payeeUserId = payeeUserId;
+        // 自动生成商户号
         this.merchantOrderNo = UUID.randomUUID().toString().replace("-","");
     }
 

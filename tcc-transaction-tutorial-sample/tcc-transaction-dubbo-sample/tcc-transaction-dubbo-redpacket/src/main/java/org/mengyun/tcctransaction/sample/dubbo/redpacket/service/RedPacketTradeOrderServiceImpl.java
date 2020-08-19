@@ -54,11 +54,12 @@ public class RedPacketTradeOrderServiceImpl implements RedPacketTradeOrderServic
             );
 
             try {
-
+                // 插入一条交易记录
                 tradeOrderRepository.insert(tradeOrder);
 
                 RedPacketAccount transferFromAccount = redPacketAccountRepository.findByUserId(tradeOrderDto.getSelfUserId());
 
+                // 更新红包账户金额
                 transferFromAccount.transferFrom(tradeOrderDto.getAmount());
 
                 redPacketAccountRepository.save(transferFromAccount);
